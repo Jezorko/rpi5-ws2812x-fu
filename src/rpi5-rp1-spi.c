@@ -210,6 +210,10 @@ void setup_spi_pins(rp1_t *rp1){
 
 }
 
+uint8_t get_bit(uint8_t array[], short bit) {
+    return (array[bit / 8] >> (bit % 8)) & 1;
+}
+
 int main(void)
 {
 
@@ -233,36 +237,6 @@ int main(void)
         printf("unable to create rp1\n");
         return 2;
     }
-
-    /////////////////////////////////////////////////////////
-    // GPIO
-    /*
-    printf("creating pins\n");
-
-    for(i=0;i<4;i++) {
-        if(!create_pin(pins[i], rp1)) {
-            printf("unable to create pin %d\n", pins[i]);
-            return 3;
-        };
-        pin_enable_output(pins[i], rp1);
-    }
-
-    for (int i = 1; i < 1; i++)
-    {
-        delay_ms(500);
-        for(j=0;j<4;j++) {
-            pin_on(rp1, pins[j]);
-            delay_ms(100);
-        }
-
-        delay_ms(500);
-
-        for(j=0;j<4;j++) {
-            pin_off(rp1, pins[j]);
-            delay_ms(100);
-        }        
-    }
-    */
     
     
     /////////////////////////////////////////////////////////
@@ -276,12 +250,6 @@ int main(void)
         return 5;
     }
 
-    // see if we can dump the spi registers
-    dump_all_spi_regs(spi, "Just after spi created");
-
-    dump_ctrlr0_msg(spi, "Just after spi created");
-    dump_sr_msg(spi, "Just after spi created");
-
     // disable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
 
@@ -289,7 +257,7 @@ int main(void)
     setup_spi_pins(rp1);
 
     // set the speed - this is the divisor from 200MHz in the RPi5
-    *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 20;
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 10; // 20 MHz
     printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
 
     // set mode - CPOL = 0, CPHA = 1 (Mode 1)
@@ -306,12 +274,6 @@ int main(void)
     // clear interrupts by reading the interrupt status register
     uint32_t reg_icr = *(volatile uint32_t *)(spi->regbase + DW_SPI_ICR);
     printf("icr: %x\n", reg_icr);
-    // read ISR
-    
-    dump_risr_msg(spi, "After clearing interrupts");
-    dump_sr_msg(spi, "After clearing interrupts");
-    dump_ctrlr0_msg(spi, "SPI has been set up");
-
 
     // mask off interrupts
     // uint32_t reg_imr = *(volatile uint32_t *)(spi->regbase + DW_SPI_IMR);
@@ -323,69 +285,71 @@ int main(void)
     // let's try and get 'ecoder data'
     printf("Reading data from the pico\n");
 
-    dump_sr_msg(spi, "Before sending command");
-    
-    uint8_t data[32];
     uint8_t command = CMD_READ_ENCODERS;
-    
-    spi_status_t res = rp1_spi_write_8_blocking(spi, command);
+
+    // LED data
+    int data_length = 22;
+    uint8_t data[22] = {
+        // R G B
+        0xff, 0x00, 0x00,
+        0x00, 0xff, 0x00,
+        0x00, 0x00, 0xff,
+        0xff, 0x00, 0xff,
+        0x00, 0xff, 0xff,
+        0xff, 0xff, 0x00,
+        0xff, 0xff, 0xff,
+        0x00 // reset
+    };
+
+    // we gotta transform
+    // ON is 800ns high, 450ns low
+    // OFF is 400ns high, 850ns low
+    // since we transmit 50ns at a time (20MHz)
+    // we need to transmit
+    // ON 16 (800ns/50) bits high, 9 (450ns/50) bits low
+    // OFF 8 (400ns/50) bits high, 17 (850ns/50) bits low
+    // which is 25 bits of transmission per bit transmitted
+    // we are bit banging, essentially
+    // but 25 bits will fucking suck to re-implement here
+    // so we'll try 24 bits (3 bytes per state) first
+    // which will be:
+    // ON 16 (800ns/50) bits high, 8 (400ns/50) bits low
+    // OFF 8 (400ns/50) bits high, 16 (800ns/50) bits low
+    uint8_t on[3]  = { 0xff, 0xff, 0x00 }; // TODO dunno if that will work for array creation?
+    uint8_t off[3] = { 0xff, 0x00, 0x00 }; // TODO dunno if that will work for array creation?
+
+    // every bit is transmitted as 24 bits
+    // so we need to create a data array with length * 24
+    int transformed_data_length = data_length * 24;
+    uint8_t data_transformed[transformed_data_length];
+
+    // for each bit
+    for (int bit = 0; bit < data_length * 8; ++bit) {
+        // get bit value
+        uint8_t bit = get_bit(data, bit);
+        // assign appropriate value to transformed data
+        // TODO: optimize and just send on/off state
+        if (bit == 1) {
+            data_transformed[(bit * 3) + 0] = on[0];
+            data_transformed[(bit * 3) + 1] = on[1];
+            data_transformed[(bit * 3) + 2] = on[2];
+        } else {
+            data_transformed[(bit * 3) + 0] = off[0];
+            data_transformed[(bit * 3) + 1] = off[1];
+            data_transformed[(bit * 3) + 2] = off[2];
+        }
+    }
+
+    // send all transformed data at once
+    spi_status_t res = rp1_spi_write_array_blocking(spi, data_transformed, transformed_data_length);
+
+    // 🤞
     if(res != SPI_OK) {
-        printf("error sending command\n");
+        printf("error sending\n");
         return 6;
     }
 
     printf("command sent\n");
-    dump_sr_msg(spi, "After sending command");
-    
-    // sometimes (particularly at low baud rates), data appears in the
-    // RF fifo, even if it was empty after the last write we made
-    // (see the code for rp1_spi_write_8_blocking() for more info)
-    // my workaround for this is to do a check and just clear the
-    // rx fifo again - it returns the number of dwords purged
-    int purgecount = 0;
-    res = rp1_spi_purge_rx_fifo(spi, &purgecount);
-    if(purgecount > 0 ) printf("%spurged %d dwords%s\n", "\033[1;31m", purgecount, "\033[0m");   
-
-    res = rp1_spi_read_8_n_blocking(spi, (uint8_t *)data, 32, 1000);
-    if(res != SPI_OK) {
-        printf("error reading data\n");
-        return 7;
-    }
-
-    dump_sr_msg(spi, "After reading data");
-
-    for(i=0;i<32;i++) {
-        printf("data[%d]: %d\n", i, data[i]);
-    }
-
-    delay_ms(10);
-
-    dump_sr_msg(spi, "Final");
-    //dump_all_spi_regs(spi, "All done");
-
-    // get the system clock from the pico
-    printf("Reading system time from the pico\n");
-    uint32_t picotime;
-    res = rp1_spi_write_8_blocking(spi, CMD_READ_SYSTIME);
-    if(res != SPI_OK) {
-        printf("error sending command\n");
-        return 6;
-    }
-    res = rp1_spi_read_8_n_blocking(spi, (uint8_t *)&picotime, 4, 1000);
-    if(res != SPI_OK) {
-        printf("error reading data\n");
-        return 7;
-    }
-
-    printf("picotime: 0x%8X\n", picotime);
-
-    printf("done\n");
 
     return 0;
 }
-
-
-
-
-
-// eof

@@ -21,6 +21,7 @@ typedef enum {
 
 
 bool rp1_spi_create(rp1_t *rp1, uint8_t spinum, rp1_spi_instance_t **spi);
+spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[], int data_length);
 spi_status_t rp1_spi_write_8_blocking(rp1_spi_instance_t *spi, uint8_t data);
 spi_status_t rp1_spi_read_8_n_blocking(rp1_spi_instance_t *spi, uint8_t *data, uint32_t len, uint32_t timeout);
 spi_status_t rp1_spi_read_32_n(rp1_spi_instance_t *spi, uint32_t *data, uint32_t len, uint32_t timeout);
