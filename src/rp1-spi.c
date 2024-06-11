@@ -40,26 +40,26 @@ bool rp1_spi_create(rp1_t *rp1, uint8_t spinum, rp1_spi_instance_t **spi)
 spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[], int data_length)
 {
 
+    // nope. no difference
+
+    // wait until the spi is not busy
+    while(*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_BUSY)
+    {
+        ;
+    }
+
+    // spin until we can write to the fifo
+    while(!(*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_TF_NOT_FULL))
+    {
+       ;
+    }
+
+    // set the CS pin
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_SER) = 1 <<0;
+
     for (int i = 0; i < data_length; ++i) {
-        // how about we do all this shit for every byte?
-
-        // wait until the spi is not busy
-        while(*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_BUSY)
-        {
-            ;
-        }
-
-        // spin until we can write to the fifo
-        while(!(*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_TF_NOT_FULL))
-        {
-           ;
-        }
-
-        // set the CS pin
-        *(volatile uint32_t *)(spi->regbase + DW_SPI_SER) = 1 <<0;
-
-        // ?? dafuq does this do
-        spi->txdata = &data[i];
+        // remove this maybe?
+        // spi->txdata = &data[i];
 
         // put the data into the fifo
         *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = data[i];
