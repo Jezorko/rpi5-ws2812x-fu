@@ -59,7 +59,7 @@ spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[
 
     for (int i = 0; i < data_length; ++i) {
         // remove this maybe?
-        // spi->txdata = &data[i];
+        // spi->txdata = &data[i]; // THIS DOES NOTHING AAAA
 
         // put the data into the fifo
         *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = data[i];
