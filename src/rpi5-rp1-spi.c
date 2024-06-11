@@ -364,7 +364,7 @@ int main(void)
         // get bit value
         uint8_t bit = get_bit(data, bit);
         // observe…
-        printf("%d\n", bit);
+        printf("%d\n", bit); // OK FUCK this doesn't work
         // assign appropriate value to transformed data
         // TODO: optimize and just send on/off state
         if (bit == 1) {
