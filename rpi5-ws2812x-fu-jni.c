@@ -702,7 +702,11 @@ JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_setLed(JNIEnv* env, jobject thi
 }
 
 JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_renderStrip(JNIEnv* env, jobject thisObject) {
-    printf("rendering…\n");
+    printf("Rendering:");
+    for (int i = 0; i < data_length; ++i) {
+        printf(" 0x%02x", data[i]);
+    }
+    printf("\n");
     rp1_spi_write_array_blocking(spi, data, data_length);
     printf("done rendering\n");
 }
