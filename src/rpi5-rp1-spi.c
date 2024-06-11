@@ -1,23 +1,3 @@
-/*
-    SPI access on RP1 through PCI BAR1
-    2024 March
-    Praktronics
-    GPL3
-    
-
-    run with sudo or as root for permissions to access to /dev/mem
-    to compile
-    /rpi5-rp1-spi $ mkdir build
-    /rpi5-rp1-spi $ cd build
-    /rpi5-rp1-spi/build $ cmake ..
-    /rpi5-rp1-spi/build $ cmake --build .
-
-    run with sudo or as root
-    /rpi5-rp1-spi/build/bin $ sudo ./rpi5-rp1-spi
-
-*/
-
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -82,29 +62,6 @@ bool create_rp1(rp1_t **rp1, void *base)
     r->rio_nosync_in = (volatile uint32_t *)(base + RP1_RIO0_BASE + RIO_NOSYNC_IN_OFFSET);
 
     *rp1 = r;
-
-    return true;
-}
-
-bool create_pin(uint8_t pinnumber, rp1_t *rp1)
-{
-    gpio_pin_t *newpin = calloc(1, sizeof(gpio_pin_t));
-    if(newpin == NULL) return false;
-
-    newpin->number = pinnumber;
-
-    // each gpio has a status and control register
-    // adjacent to each other. control = status + 4 (uint8_t)
-    newpin->status = (uint32_t *)(rp1->gpio_base + 8 * pinnumber);
-    newpin->ctrl = (uint32_t *)(rp1->gpio_base + 8 * pinnumber + 4);
-    newpin->pad = (uint32_t *)(rp1->pads_base + PADS_BANK0_GPIO_OFFSET + pinnumber * 4);
-
-    // set the function
-    *(newpin->ctrl + RP1_ATOM_CLR_OFFSET / 4) = CTRL_MASK_FUNCSEL; // first clear the bits
-    *(newpin->ctrl + RP1_ATOM_SET_OFFSET / 4) = CTRL_FUNCSEL_RIO;  // now set the value we need
-
-    rp1->pins[pinnumber] = newpin;
-    printf("pin %d stored in pins array %p\n", pinnumber, rp1->pins[pinnumber]);
 
     return true;
 }

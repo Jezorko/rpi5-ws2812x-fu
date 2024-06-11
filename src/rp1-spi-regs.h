@@ -3,7 +3,7 @@
 // from: https://github.com/raspberrypi/linux/blob/rpi-6.1.y/drivers/spi/spi-dw.h
 
 /* Register offsets (Generic for both DWC APB SSI and DWC SSI IP-cores) */
-// many of the descriptions below were auto-filled by co-pilot, so they may not be accurate
+// many of the descriptions below were auto-filled by co-pilot, so they may not be accurate // why the fuck would you do that then!!!
 // second comments are second suggestions by co-pilot
 #define DW_SPI_CTRLR0 0x00 // control register 0 (frame format, clock polarity, phase, etc.) 
 #define DW_SPI_CTRLR1 0x04 // control register 1 (number of data frames)
