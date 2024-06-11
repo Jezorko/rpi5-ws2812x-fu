@@ -29,7 +29,6 @@
 #include "rp1-regs.h"
 #include "rp1-spi.h"
 #include "rp1-spi-regs.h"
-#include "pi_pico_commands.h"
 
 void delay_ms(int milliseconds)
 {
