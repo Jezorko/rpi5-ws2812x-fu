@@ -81,7 +81,8 @@ bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
     return true;
 }
 
-rp1_spi_instance_t* initialize_spi()
+rp1_spi_instance_t *spi;
+void initialize_spi()
 {
         /////////////////////////////////////////////////////////
         // RP1
@@ -90,7 +91,6 @@ rp1_spi_instance_t* initialize_spi()
         void *base = mapgpio(RP1_BAR1, RP1_BAR1_LEN);
         if (base == NULL) {
             printf("unable to map base\n");
-            return NULL;
         }
 
         // create a rp1 device
@@ -99,7 +99,6 @@ rp1_spi_instance_t* initialize_spi()
         if (!create_rp1(&rp1, base))
         {
             printf("unable to create rp1\n");
-            return NULL;
         }
 
 
@@ -107,11 +106,9 @@ rp1_spi_instance_t* initialize_spi()
         // SPI
 
         // create a spi instance
-        rp1_spi_instance_t *spi;
         if (!rp1_spi_create(rp1, 0, &spi))
         {
             printf("unable to create spi\n");
-            return NULL;
         }
 
         // disable the SPI
@@ -146,7 +143,7 @@ rp1_spi_instance_t* initialize_spi()
 
 int main(void)
 {
-    rp1_spi_instance_t *spi = initialize_spi();
+    initialize_spi();
 
     // LED data
     int leds_count = 120;
