@@ -1,8 +1,5 @@
 #include <stddef.h>
-#include <sys/mman.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 
 #include "rp1-regs.h"
 #include "rp1-spi.h"
@@ -39,19 +36,14 @@ bool rp1_spi_create(rp1_t *rp1, uint8_t spinum, rp1_spi_instance_t **spi)
 
 void rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[], int data_length)
 {
-
-    // nope. no difference
-
-    // wait until the spi is not busy
     while(*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_BUSY)
     {
-        ;
+        /* wait until the spi is not busy */;
     }
 
-    // spin until we can write to the fifo
     while(!(*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_TF_NOT_FULL))
     {
-       ;
+       /* spin until we can write to the fifo */;
     }
 
     // set the CS pin
@@ -60,6 +52,8 @@ void rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[], int d
     for (int i = 0; i < data_length; ++i) {
         // put the data into the fifo
         *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = data[i];
-        /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR); // yeah nah it is necessary
+        // we now need to pull exactly one byte out of the fifo which would
+        // have been clocked in when we wrote the data
+        /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR);
     }
 }
