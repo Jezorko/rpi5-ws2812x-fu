@@ -172,7 +172,7 @@ int main(void)
 
     rp1_spi_write_array_blocking(spi, data, data_length);
 
-    close_spi();
+    close_strip();
 
     return 0;
 }
