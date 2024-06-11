@@ -61,7 +61,7 @@ bool rp1_spi_create(rp1_t *rp1, uint8_t spinum, rp1_spi_instance_t **spi)
 // Given 60 LEDs, with 20MHz we need 1200ns * 3 (for each color) * 60 (for each led) == 216 microseconds.
 // With 10MHz we need 288 microseconds.
 // That's a difference of 72 microseconds per 60 LEDs, or ~1 microsecond per LED.
-// With 1000 LEDs, that's 1 millisecond difference.
+// With 1000 LEDs, that's 1 millisecond difference (that's still fast enough to render at 144 FPS).
 // But I have 120 LEDs.
 // So I don't care.
 
