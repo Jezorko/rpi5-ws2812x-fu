@@ -204,7 +204,7 @@ int main(void)
         data_transformed[i] = 0x00;
     }
 
-    for (uint8_t value; value < 255; ++value) {
+    for (uint8_t value; value < 256; ++value) {
         // for each bit
         printf("{ %d = ", value);
         for (int bitId = 0; bitId < 8; ++bitId) {
