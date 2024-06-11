@@ -365,15 +365,7 @@ int main(void)
     printf("\n");
 
     // send all transformed data at once
-    spi_status_t res = rp1_spi_write_array_blocking(spi, data_transformed, transformed_data_length);
-
-    // 🤞
-    if(res != SPI_OK) {
-        printf("error sending\n");
-        return 6;
-    }
-
-    printf("command sent\n");
+    rp1_spi_write_array_blocking(spi, data_transformed, transformed_data_length);
 
     return 0;
 }
