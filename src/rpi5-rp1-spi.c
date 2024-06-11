@@ -4,19 +4,10 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <time.h>
 
 #include "rp1-regs.h"
 #include "rp1-spi.h"
 #include "rp1-spi-regs.h"
-
-void delay_ms(int milliseconds)
-{
-    struct timespec ts;
-    ts.tv_sec = milliseconds / 1000;
-    ts.tv_nsec = (milliseconds % 1000) * 1000000L;
-    nanosleep(&ts, NULL);
-}
 
 void *mapgpio(off_t dev_base, off_t dev_size)
 {
