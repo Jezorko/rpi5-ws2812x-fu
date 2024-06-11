@@ -217,7 +217,7 @@ int main(void)
             }
             if (bitId != 7) printf(", ");
         }
-        printf(" }");
+        printf(" }\n");
     }
 
     // send all transformed data at once
