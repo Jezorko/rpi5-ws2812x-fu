@@ -360,23 +360,24 @@ int main(void)
 
 
     // for each bit
-    for (int bit = 0; bit < data_length * 8; ++bit) {
+    for (int bitId /*OK WOOOPS*/ = 0; bitId < data_length * 8; ++bitId) {
         // get bit value
-        uint8_t bit = get_bit(data, bit);
-        // observe…
-        printf("%d\n", bit); // OK FUCK this doesn't work
+        uint8_t bit = get_bit(data, bitId);
+        if (bitId % 8 == 0) printf(" ");
+        printf("%d", bit);
         // assign appropriate value to transformed data
         // TODO: optimize and just send on/off state
         if (bit == 1) {
-            data_transformed[(bit * 3) + 0] = on[0];
-            data_transformed[(bit * 3) + 1] = on[1];
-            data_transformed[(bit * 3) + 2] = on[2];
+            data_transformed[(bitId * 3) + 0] = on[0];
+            data_transformed[(bitId * 3) + 1] = on[1];
+            data_transformed[(bitId * 3) + 2] = on[2];
         } else {
-            data_transformed[(bit * 3) + 0] = off[0];
-            data_transformed[(bit * 3) + 1] = off[1];
-            data_transformed[(bit * 3) + 2] = off[2];
+            data_transformed[(bitId * 3) + 0] = off[0];
+            data_transformed[(bitId * 3) + 1] = off[1];
+            data_transformed[(bitId * 3) + 2] = off[2];
         }
     }
+    printf("\n");
 
     // send all transformed data at once
     spi_status_t res = rp1_spi_write_array_blocking(spi, data_transformed, transformed_data_length);
