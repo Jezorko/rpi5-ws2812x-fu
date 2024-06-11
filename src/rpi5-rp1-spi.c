@@ -80,29 +80,6 @@ bool create_pin_2(uint8_t pinnumber, rp1_t *rp1, uint32_t funcmask)
     return true;
 }
 
-int pin_enable_output(uint8_t pinnumber, rp1_t *rp1)
-{
-
-    printf("Attempting to enable output\n");
-   
-    // first enable the pad to output
-    // pads needs to have OD[7] -> 0 (don't disable output)
-    // and                IE[6] -> 0 (don't enable input)
-    // we use atomic access to the bit clearing alias with a mask
-    // divide the offset by 4 since we're doing uint32* math
-
-    volatile uint32_t *writeadd = rp1->pins[pinnumber]->pad + RP1_ATOM_CLR_OFFSET / 4;
-
-    printf("attempting write for %p at %p\n", rp1->pins[pinnumber]->pad, writeadd);
-
-    *writeadd = PADS_MASK_OUTPUT;
-
-    // now set the RIO output enable using the atomic set alias
-    *(rp1->rio_output_enable + RP1_ATOM_SET_OFFSET / 4) = 1 << rp1->pins[pinnumber]->number;
-
-    return 0;
-}
-
 void pin_on(rp1_t *rp1, uint8_t pin)
 {
     *(rp1->rio_out + RP1_ATOM_SET_OFFSET / 4) = 1 << pin;
