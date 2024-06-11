@@ -157,9 +157,6 @@ int main(void)
     initialize_strip(leds_count);
 
     // LED data
-    int data_length = leds_count * 3;
-    uint8_t data[data_length];
-
     for (int led_id = 0; led_id < leds_count; ++led_id) {
         int led_data_id = led_id * 3;
         if (led_id % 2 == 0) {
