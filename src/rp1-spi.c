@@ -37,7 +37,7 @@ bool rp1_spi_create(rp1_t *rp1, uint8_t spinum, rp1_spi_instance_t **spi)
     return true;
 }
 
-spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[], int data_length)
+void rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[], int data_length)
 {
 
     // nope. no difference
@@ -62,6 +62,4 @@ spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[
         *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = data[i];
         /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR); // yeah nah it is necessary
     }
-
-    return SPI_OK;
 }
