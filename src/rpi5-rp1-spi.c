@@ -173,7 +173,7 @@ int main(void)
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
 
     // LED data
-    int leds_count = 60;
+    int leds_count = 120;
     int data_length = leds_count * 3;
     uint8_t data[data_length];
 
