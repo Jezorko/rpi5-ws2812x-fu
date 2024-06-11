@@ -285,7 +285,6 @@ int main(void)
     // LED data
     uint8_t data[] = {
         // G R B
-        // it goes purple-off-off, purple-off-off and so on. not great
         0x00, 0xff, 0x00, // red
         0x00, 0x00, 0xff, // blue
         0xff, 0x00, 0x00, // green
@@ -305,7 +304,7 @@ int main(void)
         0x00, 0x00, 0xff, // blue
         0xff, 0x00, 0x00, // green
         0x00, 0x00, 0x00, 0x00, 0x00 // reset
-    }; // only three light up, wtf, it's something else
+    };
     int data_length = sizeof(data);
 
     // we gotta transform

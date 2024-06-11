@@ -58,18 +58,15 @@ spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SER) = 1 <<0;
 
     for (int i = 0; i < data_length; ++i) {
-        // remove this maybe?
-        // spi->txdata = &data[i]; // THIS DOES NOTHING AAAA
-
         // put the data into the fifo
         *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = data[i];
 
         // we now need to pull exactly one byte out of the fifo which would
         // have been clocked in when we wrote the data
-        while( (!*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_RF_NOT_EMPT) || (*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_BUSY))   // check if there is data to read (check status register for Read Fifo Not Empty)
-        {
-            ;
-        }
+//        while( (!*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_RF_NOT_EMPT) || (*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_BUSY))   // check if there is data to read (check status register for Read Fifo Not Empty)
+//        {
+//            ;
+//        }
         /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR);
     }
 
