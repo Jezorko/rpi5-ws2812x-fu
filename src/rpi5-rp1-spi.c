@@ -337,37 +337,9 @@ int main(void)
     // 0xfe     0x00     0x00
     // RES 120 bits low (6000ns/50)                       == 15 bytes
     //
-    // hopefuckingfully it's the right bit order
-    // if not, we will need
-    // 00000000 00011111 11111111
-    // 00000000 00000000 01111111
-    // but let's see
-    //    uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
-    //    uint8_t off[3] = { 0xfe, 0x00, 0x00 };
-    //
-    // OK, only 3 leds light up
-    // purple/white, blue, orange
-    // so that's inconsistent
-    //
-    // well I'm an idiot and I set baud rate to 10MHz for some reason lol
-    // changed back, but still weird / inconsistent results
-    // let's try the other fucking bit order cause why not
-    //    uint8_t on[3]  = { 0x00, 0x1f, 0xff };
-    //    uint8_t off[3] = { 0x00, 0x00, 0x7f };
-    //
-    // yeah nah it's still random as fuck
-    // maybe I gotta reverse the entire thing?
-    // let's see
-    //
-    // OK, I'm like 90% sure this is fine
+    // grand success
     uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
     uint8_t off[3] = { 0xfe, 0x00, 0x00 };
-    // so let's keep it as-is
-    // what we need to do is maybe observe whether we are sending it correctly
-    // so let's get that party started
-    // we will reduce data length to only 2 colors
-    // just so we have less to analyze
-    // so red + blue + reset
 
     // every bit is transmitted as 24 bits
     // so we need to create a data array with length * 24
@@ -382,8 +354,6 @@ int main(void)
             int totalBitId = byteId * 8 + bitId;
             // get bit value
             uint8_t bit = get_bit(data, totalBitId);
-            printf("byte %d (0x%02x), bit %d (0x%02x)\n", byteId, data[byteId], bitId, bit);
-            // if (bitId == 7) printf(" ");
             // assign appropriate value to transformed data
             // TODO: optimize and just send on/off state
             if (bit == 1) {
