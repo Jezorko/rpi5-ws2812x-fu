@@ -82,8 +82,8 @@ bool create_pin(rp1_t *rp1, uint32_t funcmask)
     return true;
 }
 
-uint8_t get_bit(uint8_t array[], short bit) {
-    return (array[bit / 8] >> (bit % 8)) & 1;
+uint8_t get_bit(uint8_t value, short bit) {
+    return (value >> (bit % 8)) & 1;
 }
 
 int main(void)
@@ -204,28 +204,24 @@ int main(void)
         data_transformed[i] = 0x00;
     }
 
-    // for each bit
-    for (int byteId = 0; byteId < data_length; ++byteId) {
+    for (uint8_t value; value < 256; ++value) {
+        // for each bit
+        printf("{ ");
         for (int bitId = 0; bitId < 8; ++bitId) {
-            int totalBitId = byteId * 8 + bitId;
             // get bit value
-            uint8_t bit = get_bit(data, totalBitId);
-            // assign appropriate value to transformed data
-            // TODO: optimize and just send on/off state
+            uint8_t bit = get_bit(value, bitId);
             if (bit == 1) {
-                data_transformed[(totalBitId * 3) + 0] = on[0];
-                data_transformed[(totalBitId * 3) + 1] = on[1];
-                data_transformed[(totalBitId * 3) + 2] = on[2];
+                printf("0x%02x, 0x%02x, 0x%02x", on[0], on[1], on[2]);
             } else {
-                data_transformed[(totalBitId * 3) + 0] = off[0];
-                data_transformed[(totalBitId * 3) + 1] = off[1];
-                data_transformed[(totalBitId * 3) + 2] = off[2];
+                printf("0x%02x, 0x%02x, 0x%02x", off[0], off[1], off[2]);
             }
+            if (bitId != 7) printf(", ");
         }
+        printf(" }");
     }
 
     // send all transformed data at once
-    rp1_spi_write_array_blocking(spi, data_transformed, transformed_data_length);
+    // rp1_spi_write_array_blocking(spi, data_transformed, transformed_data_length);
 
     return 0;
 }
