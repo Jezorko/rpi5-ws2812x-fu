@@ -111,27 +111,6 @@ uint8_t get_bit(uint8_t value, short bit) {
 
 int main(void)
 {
-uint8_t on[2]  = { 0xfe, 0x00 };
-uint8_t off[2] = { 0xf0, 0x00 };
-
-        for (uint8_t value = 0; ; ++value) {
-            // for each bit
-            printf("{ ");
-            for (int bitId = 0; bitId < 8; ++bitId) {
-                // get bit value
-                uint8_t bit = get_bit(value, bitId);
-                if (bit == 1) {
-                    printf("0x%02x, 0x%02x", on[0], on[1]);
-                } else {
-                    printf("0x%02x, 0x%02x", off[0], off[1]);
-                }
-                if (bitId != 7) printf(", ");
-            }
-            printf(" },\n");
-            if (value == 255) break;
-        }
-
-/*
     int i, j;
 
     /////////////////////////////////////////////////////////
@@ -232,7 +211,6 @@ uint8_t off[2] = { 0xf0, 0x00 };
 
         msleep(500);
     }
-    */
 
     return 0;
 }
