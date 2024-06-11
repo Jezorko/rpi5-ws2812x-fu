@@ -193,36 +193,8 @@ int main(void)
     uint8_t off[3] = { 0xfe, 0x00, 0x00 };
     int reset_signal_length_bytes = 15;
 
-    // every bit is transmitted as 24 bits
-    // so we need to create a data array with length * 24
-    // plus 15 bytes for reset/latch signal
-    int transformed_data_length = (data_length * 24) + reset_signal_length_bytes;
-    uint8_t data_transformed[transformed_data_length];
-
-    // zero out last 15 bytes
-    for (int i = transformed_data_length - 1; i >= transformed_data_length - reset_signal_length_bytes; --i) {
-        data_transformed[i] = 0x00;
-    }
-
-    for (uint8_t value = 0; ; ++value) {
-        // for each bit
-        printf("{ ");
-        for (int bitId = 0; bitId < 8; ++bitId) {
-            // get bit value
-            uint8_t bit = get_bit(value, bitId);
-            if (bit == 1) {
-                printf("0x%02x, 0x%02x, 0x%02x", on[0], on[1], on[2]);
-            } else {
-                printf("0x%02x, 0x%02x, 0x%02x", off[0], off[1], off[2]);
-            }
-            if (bitId != 7) printf(", ");
-        }
-        printf(" },\n");
-        if (value == 255) break;
-    }
-
-    // send all transformed data at once
-    // rp1_spi_write_array_blocking(spi, data_transformed, transformed_data_length);
+    // send all data at once
+    rp1_spi_write_array_blocking(spi, data, data_length);
 
     return 0;
 }
