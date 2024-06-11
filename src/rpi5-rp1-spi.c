@@ -281,23 +281,13 @@ int main(void)
 
     // enable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
-    
-    // let's try and get 'ecoder data'
-    printf("Reading data from the pico\n");
-
-    uint8_t command = CMD_READ_ENCODERS;
 
     // LED data
-    int data_length = 22;
-    uint8_t data[22] = {
+    int data_length = 7;
+    uint8_t data[7] = {
         // R G B
         0xff, 0x00, 0x00,
-        0x00, 0xff, 0x00,
         0x00, 0x00, 0xff,
-        0xff, 0x00, 0xff,
-        0x00, 0xff, 0xff,
-        0xff, 0xff, 0x00,
-        0xff, 0xff, 0xff,
         0x00 // reset
     };
 
@@ -352,30 +342,40 @@ int main(void)
     // yeah nah it's still random as fuck
     // maybe I gotta reverse the entire thing?
     // let's see
-    uint8_t on[3]  = { 0x00, 0x1f, 0xff };
-    uint8_t off[3] = { 0x00, 0x00, 0x7f };
-
+    //
+    // OK, I'm like 90% sure this is fine
+    uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
+    uint8_t off[3] = { 0xfe, 0x00, 0x00 };
+    // so let's keep it as-is
+    // what we need to do is maybe observe whether we are sending it correctly
+    // so let's get that party started
+    // we will reduce data length to only 2 colors
+    // just so we have less to analyze
+    // so red + blue + reset
 
     // every bit is transmitted as 24 bits
     // so we need to create a data array with length * 24
     int transformed_data_length = data_length * 24;
     uint8_t data_transformed[transformed_data_length];
 
+
     // for each bit
     for (int bit = 0; bit < data_length * 8; ++bit) {
         // get bit value
         uint8_t bit = get_bit(data, bit);
+        // observe…
+        printf("%d\n", bit);
         // assign appropriate value to transformed data
         // TODO: optimize and just send on/off state
         if (bit == 1) {
-            data_transformed[transformed_data_length - (bit * 3) - 1] = on[0];
-            data_transformed[transformed_data_length - (bit * 3) - 2] = on[1];
-            data_transformed[transformed_data_length - (bit * 3) - 3] = on[2];
+            data_transformed[(bit * 3) + 0] = on[0];
+            data_transformed[(bit * 3) + 1] = on[1];
+            data_transformed[(bit * 3) + 2] = on[2];
         } else {
-            data_transformed[transformed_data_length - (bit * 3) - 1] = off[0];
-            data_transformed[transformed_data_length - (bit * 3) - 2] = off[1];
-            data_transformed[transformed_data_length - (bit * 3) - 3] = off[2];
-        } // nope, still fucking random
+            data_transformed[(bit * 3) + 0] = off[0];
+            data_transformed[(bit * 3) + 1] = off[1];
+            data_transformed[(bit * 3) + 2] = off[2];
+        }
     }
 
     // send all transformed data at once
