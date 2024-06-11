@@ -60,7 +60,7 @@ spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[
     for (int i = 0; i < data_length; ++i) {
         // put the data into the fifo
         *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = data[i];
-        // what about this? /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR);
+        /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR); // OK this is necessary
     }
 
     return SPI_OK;
