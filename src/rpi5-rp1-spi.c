@@ -4,11 +4,34 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <time.h> // for sleep
+#include <errno.h>     // for sleep
 
 #include "rp1-regs.h"
 #include "rp1-spi.h"
 #include "rp1-spi-regs.h"
+
+// TODO: remove
+int msleep(long msec)
+{
+    struct timespec ts;
+    int res;
+
+    if (msec < 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    ts.tv_sec = msec / 1000;
+    ts.tv_nsec = (msec % 1000) * 1000000;
+
+    do {
+        res = nanosleep(&ts, &ts);
+    } while (res && errno == EINTR);
+
+    return res;
+}
 
 void *mapgpio(off_t dev_base, off_t dev_size)
 {
@@ -150,28 +173,22 @@ int main(void)
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
 
     // LED data
-    uint8_t data[] = {
-        // G R B
-        0x00, 0xff, 0x00, // red
-        0x00, 0x00, 0xff, // blue
-        0xff, 0x00, 0x00, // green
-        0x00, 0xff, 0x00, // red
-        0x00, 0x00, 0xff, // blue
-        0xff, 0x00, 0x00, // green
-        0x00, 0xff, 0x00, // red
-        0x00, 0x00, 0xff, // blue
-        0xff, 0x00, 0x00, // green
-        0x00, 0xff, 0x00, // red
-        0x00, 0x00, 0xff, // blue
-        0xff, 0x00, 0x00, // green
-        0x00, 0xff, 0x00, // red
-        0x00, 0x00, 0xff, // blue
-        0xff, 0x00, 0x00, // green
-        0x00, 0xff, 0x00, // red
-        0x00, 0x00, 0xff, // blue
-        0xff, 0x00, 0x00, // green
-    };
-    int data_length = sizeof(data);
+    int leds_count = 60;
+    int data_length = leds_count * 3;
+    uint8_t data[data_length];
+
+    for (int led_id = 0; led_id < leds_count; ++led_id) {
+        int led_data_id = led_id * 3;
+        if (led_id % 2 == 0) {
+            data[led_data_id + 1] = 0x00; // R
+            data[led_data_id + 0] = 0x00; // G
+            data[led_data_id + 2] = 0xff; // B
+        } else {
+            data[led_data_id + 1] = 0xff; // R
+            data[led_data_id + 0] = 0x00; // G
+            data[led_data_id + 2] = 0x00; // B
+        }
+    }
 
     // send all data at once
     rp1_spi_write_array_blocking(spi, data, data_length);
