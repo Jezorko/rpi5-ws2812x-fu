@@ -283,13 +283,13 @@ int main(void)
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
 
     // LED data
-    int data_length = 7;
-    uint8_t data[7] = {
-        // R G B
-        0xff, 0x00, 0x00,
-        0x00, 0x00, 0xff,
-        0x00 // reset
-    };
+    uint8_t data[11] = {
+        // IT'S FUCKING G R B jesus
+        0x00, 0xff, 0x00, // red
+        0x00, 0x00, 0xff, // blue
+        0x00, 0x00, 0x00, 0x00, 0x00 // reset
+    }; // prints as red and white though, but consistently… why?!
+    int data_length = sizeof(data);
 
     // we gotta transform
     // ON is 800ns high, 450ns low
