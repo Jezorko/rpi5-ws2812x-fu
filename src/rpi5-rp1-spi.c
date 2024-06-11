@@ -82,61 +82,67 @@ bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
 }
 
 rp1_spi_instance_t *spi;
+
+void close_spi()
+{
+    // disable the SPI
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
+}
+
 void initialize_spi()
 {
-        /////////////////////////////////////////////////////////
-        // RP1
+    /////////////////////////////////////////////////////////
+    // RP1
 
-        // get the peripheral base address
-        void *base = mapgpio(RP1_BAR1, RP1_BAR1_LEN);
-        if (base == NULL) {
-            printf("unable to map base\n");
-        }
+    // get the peripheral base address
+    void *base = mapgpio(RP1_BAR1, RP1_BAR1_LEN);
+    if (base == NULL) {
+        printf("unable to map base\n");
+    }
 
-        // create a rp1 device
-        // printf("creating rp1\n");
-        rp1_t *rp1;
-        if (!create_rp1(&rp1, base))
-        {
-            printf("unable to create rp1\n");
-        }
+    // create a rp1 device
+    // printf("creating rp1\n");
+    rp1_t *rp1;
+    if (!create_rp1(&rp1, base))
+    {
+        printf("unable to create rp1\n");
+    }
 
 
-        /////////////////////////////////////////////////////////
-        // SPI
+    /////////////////////////////////////////////////////////
+    // SPI
 
-        // create a spi instance
-        if (!rp1_spi_create(rp1, 0, &spi))
-        {
-            printf("unable to create spi\n");
-        }
+    // create a spi instance
+    if (!rp1_spi_create(rp1, 0, &spi))
+    {
+        printf("unable to create spi\n");
+    }
 
-        // disable the SPI
-        *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
+    close_spi();
 
-        create_mosi_pin(rp1, 0x00); // MOSI is all we need anyways
+    create_mosi_pin(rp1, 0x00); // MOSI is all we need anyways
 
-        // set the speed - this is the divisor from 200MHz in the RPi5
-        *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 20; // 10 MHz
-        // printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
+    // set the speed - this is the divisor from 200MHz in the RPi5
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 20; // 10 MHz
+    // printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
 
-        // set mode - CPOL = 0, CPHA = 1 (Mode 1)
-        // printf("Setting SPI to Mode 1\n");
-        // read control
-        uint32_t reg_ctrlr0 = *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0);
-        // printf("ctrlr0 before setting: %x\n", reg_ctrlr0);
-        reg_ctrlr0 |= DW_PSSI_CTRLR0_SCPHA;
-        // update the control reg
-        *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0) = reg_ctrlr0;
-        reg_ctrlr0 = *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0);
-        // printf("ctrlr0 after setting (might be the same as before if mode was already set): %x\n", reg_ctrlr0);
+    // set mode - CPOL = 0, CPHA = 1 (Mode 1)
+    // printf("Setting SPI to Mode 1\n");
+    // read control
+    uint32_t reg_ctrlr0 = *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0);
+    // printf("ctrlr0 before setting: %x\n", reg_ctrlr0);
+    reg_ctrlr0 |= DW_PSSI_CTRLR0_SCPHA;
+    // update the control reg
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0) = reg_ctrlr0;
+    reg_ctrlr0 = *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0);
+    // printf("ctrlr0 after setting (might be the same as before if mode was already set): %x\n", reg_ctrlr0);
 
-        // clear interrupts by reading the interrupt status register
-        uint32_t reg_icr = *(volatile uint32_t *)(spi->regbase + DW_SPI_ICR);
-        // printf("icr: %x\n", reg_icr);
+    // clear interrupts by reading the interrupt status register
+    uint32_t reg_icr = *(volatile uint32_t *)(spi->regbase + DW_SPI_ICR);
+    // printf("icr: %x\n", reg_icr);
 
-        // enable the SPI
-        *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
+    // enable the SPI
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
 }
 
 int main(void)
@@ -162,6 +168,8 @@ int main(void)
     }
 
     rp1_spi_write_array_blocking(spi, data, data_length);
+
+    close_spi();
 
     return 0;
 }
