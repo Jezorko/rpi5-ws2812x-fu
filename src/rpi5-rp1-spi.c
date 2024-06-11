@@ -57,10 +57,9 @@ bool create_rp1(rp1_t **rp1, void *base)
     return true;
 }
 
-uint8_t mosi_pin_number = 10;
-
-bool create_pin(rp1_t *rp1, uint32_t funcmask)
+bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
 {
+    uint8_t mosi_pin_number = 10;
     gpio_pin_t *newpin = calloc(1, sizeof(gpio_pin_t));
     if(newpin == NULL) return false;
 
@@ -102,7 +101,7 @@ int main(void)
     } 
 
     // create a rp1 device
-    printf("creating rp1\n");
+    // printf("creating rp1\n");
     rp1_t *rp1;
     if (!create_rp1(&rp1, base))
     {
@@ -125,31 +124,26 @@ int main(void)
     // disable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
 
-    printf("setting up the pins for SPI0\n");
-    create_pin(rp1, 0x00); // MOSI
+    create_mosi_pin(rp1, 0x00); // MOSI is all we need anyways
 
     // set the speed - this is the divisor from 200MHz in the RPi5
     *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 10; // 20 MHz
-    printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
+    // printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
 
     // set mode - CPOL = 0, CPHA = 1 (Mode 1)
-    printf("Setting SPI to Mode 1\n");
+    // printf("Setting SPI to Mode 1\n");
     // read control
     uint32_t reg_ctrlr0 = *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0);
-    printf("ctrlr0 before setting: %x\n", reg_ctrlr0);
+    // printf("ctrlr0 before setting: %x\n", reg_ctrlr0);
     reg_ctrlr0 |= DW_PSSI_CTRLR0_SCPHA;
     // update the control reg
     *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0) = reg_ctrlr0;
     reg_ctrlr0 = *(volatile uint32_t *)(spi->regbase + DW_SPI_CTRLR0);
-    printf("ctrlr0 after setting (might be the same as before if mode was already set): %x\n", reg_ctrlr0);
+    // printf("ctrlr0 after setting (might be the same as before if mode was already set): %x\n", reg_ctrlr0);
 
     // clear interrupts by reading the interrupt status register
     uint32_t reg_icr = *(volatile uint32_t *)(spi->regbase + DW_SPI_ICR);
     printf("icr: %x\n", reg_icr);
-
-    // mask off interrupts
-    // uint32_t reg_imr = *(volatile uint32_t *)(spi->regbase + DW_SPI_IMR);
-    // *(volatile uint32_t *)(spi->regbase + DW_SPI_IMR) = reg_imr & 0xFFFFFF00;
 
     // enable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
