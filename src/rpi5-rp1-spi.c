@@ -57,45 +57,29 @@ bool create_rp1(rp1_t **rp1, void *base)
     return true;
 }
 
-bool create_pin_2(uint8_t pinnumber, rp1_t *rp1, uint32_t funcmask)
+uint8_t mosi_pin_number = 10;
+
+bool create_pin(rp1_t *rp1, uint32_t funcmask)
 {
     gpio_pin_t *newpin = calloc(1, sizeof(gpio_pin_t));
     if(newpin == NULL) return false;
 
-    newpin->number = pinnumber;
+    newpin->number = mosi_pin_number;
 
     // each gpio has a status and control register
     // adjacent to each other. control = status + 4 (uint8_t)
-    newpin->status = (uint32_t *)(rp1->gpio_base + 8 * pinnumber);
-    newpin->ctrl = (uint32_t *)(rp1->gpio_base + 8 * pinnumber + 4);
-    newpin->pad = (uint32_t *)(rp1->pads_base + PADS_BANK0_GPIO_OFFSET + pinnumber * 4);
+    newpin->status = (uint32_t *)(rp1->gpio_base + 8 * mosi_pin_number);
+    newpin->ctrl = (uint32_t *)(rp1->gpio_base + 8 * mosi_pin_number + 4);
+    newpin->pad = (uint32_t *)(rp1->pads_base + PADS_BANK0_GPIO_OFFSET + mosi_pin_number * 4);
 
     // set the function
     *(newpin->ctrl + RP1_ATOM_CLR_OFFSET / 4) = CTRL_MASK_FUNCSEL; // first clear the bits
     *(newpin->ctrl + RP1_ATOM_SET_OFFSET / 4) = funcmask;  // now set the value we need
 
-    rp1->pins[pinnumber] = newpin;
-    //printf("pin %d stored in pins array %p\n", pinnumber, rp1->pins[pinnumber]);
+    rp1->pins[mosi_pin_number] = newpin;
+    //printf("pin %d stored in pins array %p\n", mosi_pin_number, rp1->pins[mosi_pin_number]);
 
     return true;
-}
-
-void pin_on(rp1_t *rp1, uint8_t pin)
-{
-    *(rp1->rio_out + RP1_ATOM_SET_OFFSET / 4) = 1 << pin;
-}
-void pin_off(rp1_t *rp1, uint8_t pin)
-{
-    *(rp1->rio_out + RP1_ATOM_CLR_OFFSET / 4) = 1 << pin;
-}
-
-
-const uint8_t pins[] = {17, 27, 22, 23};
-
-void setup_spi_pins(rp1_t *rp1){
-
-    create_pin_2(10, rp1, 0x00);    // MOSI
-
 }
 
 uint8_t get_bit(uint8_t array[], short bit) {
@@ -142,7 +126,7 @@ int main(void)
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
 
     printf("setting up the pins for SPI0\n");
-    setup_spi_pins(rp1);
+    create_pin(rp1, 0x00); // MOSI
 
     // set the speed - this is the divisor from 200MHz in the RPi5
     *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 10; // 20 MHz
