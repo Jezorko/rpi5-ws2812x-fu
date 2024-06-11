@@ -137,8 +137,6 @@ void initialize_spi()
 
         // enable the SPI
         *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
-
-        return spi;
 }
 
 int main(void)
