@@ -82,6 +82,10 @@ bool create_pin(rp1_t *rp1, uint32_t funcmask)
     return true;
 }
 
+uint8_t get_bit(uint8_t array[], short bit) {
+    return (array[bit / 8] >> (bit % 8)) & 1;
+}
+
 int main(void)
 {
 
@@ -171,14 +175,34 @@ int main(void)
         0x00, 0xff, 0x00, // red
         0x00, 0x00, 0xff, // blue
         0xff, 0x00, 0x00, // green
-        0x00, 0x00, 0x00, 0x00, 0x00 // RES
     };
     int data_length = sizeof(data);
 
+    // according to https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/
+    // since we transmit 50ns at a time (20MHz) we will need to transmit 3 bytes (24 bits, 1200ns) per byte of data
+    // most fitting timings would be:
+    // ON 13 (650ns/50) bits high, 11 (550ns/50) bits low
+    // 11111111 11111000 00000000
+    // 0xff     0xf8     0x00
+    // OFF 7 (350ns/50) bits high, 17 (850ns/50) bits low
+    // 11111110 00000000 00000000
+    // 0xfe     0x00     0x00
+    // and to reset/latch
+    // RES 120 bits low (6000ns/50) == 15 bytes
+    uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
+    uint8_t off[3] = { 0xfe, 0x00, 0x00 };
+    int reset_signal_length_bytes = 15;
+
     // every bit is transmitted as 24 bits
     // so we need to create a data array with length * 24
-    int transformed_data_length = data_length * 24;
+    // plus 15 bytes for reset/latch signal
+    int transformed_data_length = (data_length * 24) + reset_signal_length_bytes;
     uint8_t data_transformed[transformed_data_length];
+
+    // zero out last 15 bytes
+    for (int i = transformed_data_length - 1; i >= transformed_data_length - reset_signal_length_bytes; --i) {
+        data_transformed[i] = 0x00;
+    }
 
     // for each bit
     for (int byteId = 0; byteId < data_length; ++byteId) {
