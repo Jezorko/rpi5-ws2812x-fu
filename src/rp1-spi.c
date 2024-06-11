@@ -46,14 +46,24 @@ bool rp1_spi_create(rp1_t *rp1, uint8_t spinum, rp1_spi_instance_t **spi)
 // RES 120 bits low (6000ns/50) == 15 bytes
 // uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
 // uint8_t off[3] = { 0xfe, 0x00, 0x00 };
-
-// for 10MHz we need 2 bytes per bit
+//
+// OK, with 20MHz it's not setting the LEDs correctly
+// guessing there's some flicker on the wire
+// so we will use 10MHz and in this case we need 2 bytes per bit
 // ON 7 (700ns) bits high, 9 (900ns) bits low
 // 11111110 00000000
 // 0xfe     0x00
 // OFF 4 (400ns) bits high, 12 (1200ns) bits low
 // 11110000 00000000
 // 0xf0     0x00
+//
+// This will need 1600ns instead of 1200ns per byte of data which is ~30% slower, but that's fine.
+// Given 60 LEDs, with 20MHz we need 1200ns * 3 (for each color) * 60 (for each led) == 216 microseconds.
+// With 10MHz we need 288 microseconds.
+// That's a difference of 72 microseconds per 60 LEDs, or ~1 microsecond per LED.
+// With 1000 LEDs, that's 1 millisecond difference.
+// But I have 120 LEDs.
+// So I don't care.
 
 // instead of transforming one bit at a time, we will just read from a lookup table
 // cause screw it, it's Raspberry 5, we got a ton of memory anyways
