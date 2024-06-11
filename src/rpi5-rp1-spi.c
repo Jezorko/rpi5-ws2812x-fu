@@ -315,8 +315,46 @@ int main(void)
     // which will be:
     // ON 16 (800ns/50) bits high, 8 (400ns/50) bits low
     // OFF 8 (400ns/50) bits high, 16 (800ns/50) bits low
-    uint8_t on[3]  = { 0xff, 0xff, 0x00 }; // TODO dunno if that will work for array creation?
-    uint8_t off[3] = { 0xff, 0x00, 0x00 }; // TODO dunno if that will work for array creation?
+    //
+    // OK, scratch that
+    // according to https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/
+    // we can do
+    // ON 14 (700ns/50) bits high, 12 (600ns/50) bits low == 26 bits total
+    // OFF 7 (350ns/50) bits high, 12 (600ns/50) bits low == 19 bits total
+    // but that kinda doesn't add up to 24 bits, so it will kinda suck to push
+    // so instead we will do
+    // ON 13 (650ns/50) bits high, 11 (550ns/50) bits low == 24 bits / 3 bytes total
+    // 11111111 11111000 00000000
+    // 0xff     0xf8     0x00
+    // OFF 7 (350ns/50) bits high, 17 (850ns/50) bits low == 24 bits / 3 bytes total
+    // 11111110 00000000 00000000
+    // 0xfe     0x00     0x00
+    // RES 120 bits low (6000ns/50)                       == 15 bytes
+    //
+    // hopefuckingfully it's the right bit order
+    // if not, we will need
+    // 00000000 00011111 11111111
+    // 00000000 00000000 01111111
+    // but let's see
+    //    uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
+    //    uint8_t off[3] = { 0xfe, 0x00, 0x00 };
+    //
+    // OK, only 3 leds light up
+    // purple/white, blue, orange
+    // so that's inconsistent
+    //
+    // well I'm an idiot and I set baud rate to 10MHz for some reason lol
+    // changed back, but still weird / inconsistent results
+    // let's try the other fucking bit order cause why not
+    //    uint8_t on[3]  = { 0x00, 0x1f, 0xff };
+    //    uint8_t off[3] = { 0x00, 0x00, 0x7f };
+    //
+    // yeah nah it's still random as fuck
+    // maybe I gotta reverse the entire thing?
+    // let's see
+    uint8_t on[3]  = { 0x00, 0x1f, 0xff };
+    uint8_t off[3] = { 0x00, 0x00, 0x7f };
+
 
     // every bit is transmitted as 24 bits
     // so we need to create a data array with length * 24
@@ -330,14 +368,14 @@ int main(void)
         // assign appropriate value to transformed data
         // TODO: optimize and just send on/off state
         if (bit == 1) {
-            data_transformed[(bit * 3) + 0] = on[0];
-            data_transformed[(bit * 3) + 1] = on[1];
-            data_transformed[(bit * 3) + 2] = on[2];
+            data_transformed[transformed_data_length - (bit * 3) - 1] = on[0];
+            data_transformed[transformed_data_length - (bit * 3) - 2] = on[1];
+            data_transformed[transformed_data_length - (bit * 3) - 3] = on[2];
         } else {
-            data_transformed[(bit * 3) + 0] = off[0];
-            data_transformed[(bit * 3) + 1] = off[1];
-            data_transformed[(bit * 3) + 2] = off[2];
-        }
+            data_transformed[transformed_data_length - (bit * 3) - 1] = off[0];
+            data_transformed[transformed_data_length - (bit * 3) - 2] = off[1];
+            data_transformed[transformed_data_length - (bit * 3) - 3] = off[2];
+        } // nope, still fucking random
     }
 
     // send all transformed data at once
