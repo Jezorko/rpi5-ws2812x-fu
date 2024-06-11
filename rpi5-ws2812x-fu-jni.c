@@ -568,10 +568,9 @@ void *mapgpio(off_t dev_base, off_t dev_size)
 
 bool create_rp1(rp1_t **rp1, void *base)
 {
-
-    rp1_t *r = (rp1_t *)calloc(1, sizeof(rp1_t));
-    if (r == NULL)
-        return false;
+    printf("creating RP1");
+    rp1_t *r = (rp1_t*) calloc(1, sizeof(rp1_t));
+    if (r == NULL) return false;
 
     r->rp1_peripherial_base = base;
     r->gpio_base = base + RP1_IO_BANK0_BASE;
@@ -582,6 +581,7 @@ bool create_rp1(rp1_t **rp1, void *base)
 
     *rp1 = r;
 
+    printf("RP1 created all good");
     return true;
 }
 
@@ -606,11 +606,11 @@ bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
     rp1->pins[mosi_pin_number] = newpin;
     //printf("pin %d stored in pins array %p\n", mosi_pin_number, rp1->pins[mosi_pin_number]);
 
+    printf("created MOSI pin");
     return true;
 }
 
 rp1_spi_instance_t *spi;
-
 int data_length = 0;
 uint8_t* data;
 
@@ -618,7 +618,6 @@ void close_strip()
 {
     // disable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
-    free(data);
 }
 
 JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_initializeStrip(JNIEnv* env, jobject thisObject, jint leds_count)
@@ -708,6 +707,7 @@ JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_renderStrip(JNIEnv* env, jobjec
 
 JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_closeStrip(JNIEnv* env, jobject thisObject) {
     close_strip();
+    free(data);
 }
 
 }
