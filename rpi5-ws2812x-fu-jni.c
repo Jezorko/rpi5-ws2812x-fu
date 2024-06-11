@@ -1,3 +1,4 @@
+#include <jni.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -5,6 +6,9 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <stddef.h>
+
+extern "C"
+{
 
 // pci bar info
 // from: https://github.com/G33KatWork/RP1-Reverse-Engineering/blob/master/pcie/hacks.py
@@ -617,7 +621,7 @@ void close_strip()
     free(data);
 }
 
-uint8_t* initialize_strip(int leds_count)
+JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_initializeStrip(JNIEnv* env, jobject thisObject, jint leds_count)
 {
     data_length = leds_count * 3;
     data = (uint8_t*) malloc(leds_count * 3);
@@ -673,10 +677,37 @@ uint8_t* initialize_strip(int leds_count)
 
     // enable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
-
-    return data;
 }
 
-void render_strip() {
+JNIEXPORT jint JNICALL Java_jezor_jni_RPi5RP1SPI_getLedsCount(JNIEnv* env, jobject thisObject) {
+    return data_length / 3;
+}
+
+JNIEXPORT jint JNICALL Java_jezor_jni_RPi5RP1SPI_getGreenComponent(JNIEnv* env, jobject thisObject, jint led_index) {
+    return data[led_index * 3];
+}
+
+JNIEXPORT jint JNICALL Java_jezor_jni_RPi5RP1SPI_getRedComponent(JNIEnv* env, jobject thisObject, jint led_index) {
+    return data[led_index * 3 + 1];
+}
+
+JNIEXPORT jint JNICALL Java_jezor_jni_RPi5RP1SPI_getBlueComponent(JNIEnv* env, jobject thisObject, jint led_index) {
+    return data[led_index * 3 + 2];
+}
+
+JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_setLed(JNIEnv* env, jobject thisObject, jint led_index, jint red, jint green, jint blue) {
+    int data_index = led_index * 3;
+    data[data_index] = green;
+    data[data_index + 1] = red;
+    data[data_index + 2] = blue;
+}
+
+JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_renderStrip(JNIEnv* env, jobject thisObject) {
     rp1_spi_write_array_blocking(spi, data, data_length);
+}
+
+JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_closeStrip(JNIEnv* env, jobject thisObject) {
+    close_strip();
+}
+
 }
