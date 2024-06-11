@@ -358,23 +358,27 @@ int main(void)
     int transformed_data_length = data_length * 24;
     uint8_t data_transformed[transformed_data_length];
 
+    // printf("0x%02x", value); to print value as 0xab
 
     // for each bit
-    for (int bitId /*OK WOOOPS*/ = 0; bitId < data_length * 8; ++bitId) {
-        // get bit value
-        uint8_t bit = get_bit(data, bitId);
-        if (bitId % 8 == 0) printf(" ");
-        printf("%d", bit);
-        // assign appropriate value to transformed data
-        // TODO: optimize and just send on/off state
-        if (bit == 1) {
-            data_transformed[(bitId * 3) + 0] = on[0];
-            data_transformed[(bitId * 3) + 1] = on[1];
-            data_transformed[(bitId * 3) + 2] = on[2];
-        } else {
-            data_transformed[(bitId * 3) + 0] = off[0];
-            data_transformed[(bitId * 3) + 1] = off[1];
-            data_transformed[(bitId * 3) + 2] = off[2];
+    for (int byteId = 0; byteId < data_length; ++byteId) {
+        for (int bitId = 0; bitId < 8; ++bitId) {
+            int totalBitId = byteId * 8 + bitId;
+            // get bit value
+            uint8_t bit = get_bit(data, totalBitId);
+            printf("byte %d (0x%02x), bit %d (0x%02x)\n", byteId, data[byteId], bitId, bit);
+            // if (bitId == 7) printf(" ");
+            // assign appropriate value to transformed data
+            // TODO: optimize and just send on/off state
+            if (bit == 1) {
+                data_transformed[(totalBitId * 3) + 0] = on[0];
+                data_transformed[(totalBitId * 3) + 1] = on[1];
+                data_transformed[(totalBitId * 3) + 2] = on[2];
+            } else {
+                data_transformed[(totalBitId * 3) + 0] = off[0];
+                data_transformed[(totalBitId * 3) + 1] = off[1];
+                data_transformed[(totalBitId * 3) + 2] = off[2];
+            }
         }
     }
     printf("\n");
