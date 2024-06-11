@@ -93,7 +93,7 @@ void close_strip()
     free(data);
 }
 
-void initialize_strip(int leds_count)
+uint8_t* initialize_strip(int leds_count)
 {
     data_length = leds_count * 3;
     data = (uint8_t*) malloc(leds_count * 3);
@@ -149,12 +149,18 @@ void initialize_strip(int leds_count)
 
     // enable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
+
+    return data;
+}
+
+void render_strip() {
+    rp1_spi_write_array_blocking(spi, data, data_length);
 }
 
 int main(void)
 {
     int leds_count = 120;
-    initialize_strip(leds_count);
+    uint8_t* data = initialize_strip(leds_count);
 
     // LED data
     for (int led_id = 0; led_id < leds_count; ++led_id) {
@@ -170,8 +176,7 @@ int main(void)
         }
     }
 
-    rp1_spi_write_array_blocking(spi, data, data_length);
-
+    render_strip();
     close_strip();
 
     return 0;
