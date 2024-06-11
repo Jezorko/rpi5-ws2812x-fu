@@ -201,10 +201,7 @@ const uint8_t pins[] = {17, 27, 22, 23};
 
 void setup_spi_pins(rp1_t *rp1){
 
-    create_pin_2(8, rp1, 0x00);     // CS0
-    create_pin_2(9, rp1, 0x00);     // MISO
     create_pin_2(10, rp1, 0x00);    // MOSI
-    create_pin_2(11, rp1, 0x00);    // SCLK
 
 }
 
