@@ -105,10 +105,6 @@ bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
     return true;
 }
 
-uint8_t get_bit(uint8_t value, short bit) {
-    return (value >> (bit % 8)) & 1;
-}
-
 int main(void)
 {
 
@@ -177,21 +173,41 @@ int main(void)
     int data_length = leds_count * 3;
     uint8_t data[data_length];
 
-    for (int led_id = 0; led_id < leds_count; ++led_id) {
-        int led_data_id = led_id * 3;
-        if (led_id % 2 == 0) {
-            data[led_data_id + 1] = 0x00; // R
-            data[led_data_id + 0] = 0x00; // G
-            data[led_data_id + 2] = 0xff; // B
-        } else {
-            data[led_data_id + 1] = 0xff; // R
-            data[led_data_id + 0] = 0x00; // G
-            data[led_data_id + 2] = 0x00; // B
+    for (int i = 0; i < 10; ++i) {
+        for (int led_id = 0; led_id < leds_count; ++led_id) {
+            int led_data_id = led_id * 3;
+            if (led_id % 2 == 0) {
+                data[led_data_id + 1] = 0x00; // R
+                data[led_data_id + 0] = 0x00; // G
+                data[led_data_id + 2] = 0xff; // B
+            } else {
+                data[led_data_id + 1] = 0xff; // R
+                data[led_data_id + 0] = 0x00; // G
+                data[led_data_id + 2] = 0x00; // B
+            }
         }
-    }
 
-    // send all data at once
-    rp1_spi_write_array_blocking(spi, data, data_length);
+        rp1_spi_write_array_blocking(spi, data, data_length);
+
+        msleep(500);
+
+        for (int led_id = 0; led_id < leds_count; ++led_id) {
+            int led_data_id = led_id * 3;
+            if (led_id % 2 == 0) {
+                data[led_data_id + 1] = 0x00; // R
+                data[led_data_id + 0] = 0xff; // G
+                data[led_data_id + 2] = 0x00; // B
+            } else {
+                data[led_data_id + 1] = 0x00; // R
+                data[led_data_id + 0] = 0xff; // G
+                data[led_data_id + 2] = 0xff; // B
+            }
+        }
+
+        rp1_spi_write_array_blocking(spi, data, data_length);
+
+        msleep(500);
+    }
 
     return 0;
 }
