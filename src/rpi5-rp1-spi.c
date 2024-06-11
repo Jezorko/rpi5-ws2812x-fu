@@ -204,7 +204,7 @@ int main(void)
         data_transformed[i] = 0x00;
     }
 
-    for (uint8_t value; value != 255; ++value) {
+    for (uint8_t value = 0; ; ++value) {
         // for each bit
         printf("{ %d = ", value);
         for (int bitId = 0; bitId < 8; ++bitId) {
@@ -218,6 +218,7 @@ int main(void)
             if (bitId != 7) printf(", ");
         }
         printf(" },\n");
+        if (value == 255) break;
     }
 
     // send all transformed data at once
