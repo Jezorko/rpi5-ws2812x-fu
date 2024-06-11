@@ -63,6 +63,7 @@ spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[
         *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = data[i];
 
         // what if I just… don't?
+        // now it's red-… eh I don't even wanna list that
     }
 
     return SPI_OK;
