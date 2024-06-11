@@ -565,7 +565,6 @@ void *mapgpio(off_t dev_base, off_t dev_size)
 
 bool create_rp1(rp1_t **rp1, void *base)
 {
-    printf("creating RP1\n");
     rp1_t *r = (rp1_t*) calloc(1, sizeof(rp1_t));
     if (r == NULL) return false;
 
@@ -578,7 +577,6 @@ bool create_rp1(rp1_t **rp1, void *base)
 
     *rp1 = r;
 
-    printf("RP1 created all good\n");
     return true;
 }
 
@@ -603,7 +601,6 @@ bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
     rp1->pins[mosi_pin_number] = newpin;
     //printf("pin %d stored in pins array %p\n", mosi_pin_number, rp1->pins[mosi_pin_number]);
 
-    printf("created MOSI pin\n");
     return true;
 }
 
@@ -702,13 +699,7 @@ JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_setLed(JNIEnv* env, jobject thi
 }
 
 JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_renderStrip(JNIEnv* env, jobject thisObject) {
-    printf("Rendering:");
-    for (int i = 0; i < data_length; ++i) {
-        printf(" 0x%02x", data[i]);
-    }
-    printf("\n");
     rp1_spi_write_array_blocking(spi, data, data_length);
-    printf("done rendering\n");
 }
 
 JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_closeStrip(JNIEnv* env, jobject thisObject) {
