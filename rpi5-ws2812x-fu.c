@@ -680,28 +680,3 @@ uint8_t* initialize_strip(int leds_count)
 void render_strip() {
     rp1_spi_write_array_blocking(spi, data, data_length);
 }
-
-int main(void)
-{
-    int leds_count = 120;
-    uint8_t* data = initialize_strip(leds_count);
-
-    // LED data
-    for (int led_id = 0; led_id < leds_count; ++led_id) {
-        int led_data_id = led_id * 3;
-        if (led_id % 2 == 0) {
-            data[led_data_id + 1] = 0x00; // R
-            data[led_data_id + 0] = 0x00; // G
-            data[led_data_id + 2] = 0xff; // B
-        } else {
-            data[led_data_id + 1] = 0xff; // R
-            data[led_data_id + 0] = 0x00; // G
-            data[led_data_id + 2] = 0x00; // B
-        }
-    }
-
-    render_strip();
-    close_strip();
-
-    return 0;
-}
