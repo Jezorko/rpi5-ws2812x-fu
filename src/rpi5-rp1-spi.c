@@ -14,7 +14,7 @@ void *mapgpio(off_t dev_base, off_t dev_size)
     int fd;
     void *mapped;
     
-    printf("sizeof(off_t) %d\n", sizeof(off_t));
+    // printf("sizeof(off_t) %d\n", sizeof(off_t));
 
     if ((fd = open("/dev/mem", O_RDWR | O_SYNC)) == -1)
     {
@@ -25,7 +25,7 @@ void *mapgpio(off_t dev_base, off_t dev_size)
     mapped = mmap(0, dev_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, dev_base);
     // close(fd);
 
-    printf("base address: %llx, size: %x, mapped: %p\n", dev_base, dev_size, mapped);
+    // printf("base address: %llx, size: %x, mapped: %p\n", dev_base, dev_size, mapped);
 
     if (mapped == (void *)-1)
     {
@@ -143,7 +143,7 @@ int main(void)
 
     // clear interrupts by reading the interrupt status register
     uint32_t reg_icr = *(volatile uint32_t *)(spi->regbase + DW_SPI_ICR);
-    printf("icr: %x\n", reg_icr);
+    // printf("icr: %x\n", reg_icr);
 
     // enable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x1;
