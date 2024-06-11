@@ -192,11 +192,6 @@ int main(void)
     uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
     uint8_t off[3] = { 0xfe, 0x00, 0x00 };
     int reset_signal_length_bytes = 15;
-    // let's try one bit per 100ns
-    // 8 high, 8 low -> two bytes
-    // 4 high, 12 low -> two bytes
-    // but that will be 1600ns per byte of data, which is 400ns more than doing 20MHz
-    // so screw it
 
     // every bit is transmitted as 24 bits
     // so we need to create a data array with length * 24
