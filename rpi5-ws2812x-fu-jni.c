@@ -7,9 +7,6 @@
 #include <fcntl.h>
 #include <stddef.h>
 
-extern "C"
-{
-
 // pci bar info
 // from: https://github.com/G33KatWork/RP1-Reverse-Engineering/blob/master/pcie/hacks.py
 #define RP1_BAR1 0x1f00000000
@@ -619,6 +616,9 @@ void close_strip()
     // disable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
 }
+
+extern "C"
+{
 
 JNIEXPORT void JNICALL Java_jezor_jni_RPi5RP1SPI_initializeStrip(JNIEnv* env, jobject thisObject, jint leds_count)
 {
