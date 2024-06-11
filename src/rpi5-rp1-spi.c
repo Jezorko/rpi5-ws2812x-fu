@@ -206,7 +206,7 @@ int main(void)
 
     for (uint8_t value; value < 255; ++value) {
         // for each bit
-        printf("{ ");
+        printf("{ %d = ", value);
         for (int bitId = 0; bitId < 8; ++bitId) {
             // get bit value
             uint8_t bit = get_bit(value, bitId);
