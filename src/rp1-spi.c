@@ -64,7 +64,7 @@ spi_status_t rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[
 
         // we now need to pull exactly one byte out of the fifo which would
         // have been clocked in when we wrote the data
-        // TODO: do we though? let's see!
+        // I'm getting purple-white-off-green hahaha kill me
         while( (!*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_RF_NOT_EMPT) || (*(volatile uint32_t *)(spi->regbase + DW_SPI_SR) & DW_SPI_SR_BUSY))   // check if there is data to read (check status register for Read Fifo Not Empty)
         {
             ;
