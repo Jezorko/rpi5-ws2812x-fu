@@ -105,9 +105,33 @@ bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
     return true;
 }
 
+uint8_t get_bit(uint8_t value, short bit) {
+    return (value >> (bit % 8)) & 1;
+}
+
 int main(void)
 {
+uint8_t on[2]  = { 0xfe, 0x00 };
+uint8_t off[2] = { 0xf0, 0x00 };
 
+        for (uint8_t value = 0; ; ++value) {
+            // for each bit
+            printf("{ ");
+            for (int bitId = 0; bitId < 8; ++bitId) {
+                // get bit value
+                uint8_t bit = get_bit(value, bitId);
+                if (bit == 1) {
+                    printf("0x%02x, 0x%02x", on[0], on[1]);
+                } else {
+                    printf("0x%02x, 0x%02x", off[0], off[1]);
+                }
+                if (bitId != 7) printf(", ");
+            }
+            printf(" },\n");
+            if (value == 255) break;
+        }
+
+/*
     int i, j;
 
     /////////////////////////////////////////////////////////
@@ -147,8 +171,8 @@ int main(void)
     create_mosi_pin(rp1, 0x00); // MOSI is all we need anyways
 
     // set the speed - this is the divisor from 200MHz in the RPi5
-    *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 10; // 20 MHz
-    // printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 20; // 10 MHz
+    printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
 
     // set mode - CPOL = 0, CPHA = 1 (Mode 1)
     // printf("Setting SPI to Mode 1\n");
@@ -208,6 +232,7 @@ int main(void)
 
         msleep(500);
     }
+    */
 
     return 0;
 }

@@ -47,6 +47,14 @@ bool rp1_spi_create(rp1_t *rp1, uint8_t spinum, rp1_spi_instance_t **spi)
 // uint8_t on[3]  = { 0xff, 0xf8, 0x00 };
 // uint8_t off[3] = { 0xfe, 0x00, 0x00 };
 
+// for 10MHz we need 2 bytes per bit
+// ON 7 (700ns) bits high, 9 (900ns) bits low
+// 11111110 00000000
+// 0xfe     0x00
+// OFF 4 (400ns) bits high, 12 (1200ns) bits low
+// 11110000 00000000
+// 0xf0     0x00
+
 // instead of transforming one bit at a time, we will just read from a lookup table
 // cause screw it, it's Raspberry 5, we got a ton of memory anyways
 uint8_t lookup_table[256][25] = {
