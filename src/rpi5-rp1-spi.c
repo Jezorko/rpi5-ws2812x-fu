@@ -83,14 +83,20 @@ bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
 
 rp1_spi_instance_t *spi;
 
-void close_spi()
+int data_length = 0;
+uint8_t* data;
+
+void close_strip()
 {
     // disable the SPI
     *(volatile uint32_t *)(spi->regbase + DW_SPI_SSIENR) = 0x0;
+    free(data);
 }
 
-void initialize_spi()
+void initialize_strip(int leds_count)
 {
+    data_length = leds_count * 3;
+    data = (uint8_t*) malloc(leds_count * 3);
     /////////////////////////////////////////////////////////
     // RP1
 
@@ -118,7 +124,7 @@ void initialize_spi()
         printf("unable to create spi\n");
     }
 
-    close_spi();
+    close_strip();
 
     create_mosi_pin(rp1, 0x00); // MOSI is all we need anyways
 
@@ -147,10 +153,10 @@ void initialize_spi()
 
 int main(void)
 {
-    initialize_spi();
+    int leds_count = 120;
+    initialize_strip(leds_count);
 
     // LED data
-    int leds_count = 120;
     int data_length = leds_count * 3;
     uint8_t data[data_length];
 
