@@ -588,7 +588,7 @@ bool create_rp1(rp1_t **rp1, void *base)
 bool create_mosi_pin(rp1_t *rp1, uint32_t funcmask)
 {
     uint8_t mosi_pin_number = 10;
-    gpio_pin_t *newpin = calloc(1, sizeof(gpio_pin_t));
+    gpio_pin_t *newpin = (gpio_pin_t*) calloc(1, sizeof(gpio_pin_t));
     if(newpin == NULL) return false;
 
     newpin->number = mosi_pin_number;
