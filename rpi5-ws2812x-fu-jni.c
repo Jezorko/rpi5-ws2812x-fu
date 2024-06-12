@@ -525,10 +525,10 @@ void rp1_spi_write_array_blocking(rp1_spi_instance_t *spi, uint8_t data[], int d
         for (int bits_byte = 0; bits_byte < 16; ++bits_byte) {
             // put the data into the fifo
             *(volatile uint8_t *)(spi->regbase + DW_SPI_DR) = lookup_table[data[data_byte]][bits_byte];
-            // we now need to pull exactly one byte out of the fifo which would
-            // have been clocked in when we wrote the data
-            /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR);
         }
+        // we now need to pull exactly one byte out of the fifo which would
+        // have been clocked in when we wrote the data
+        /*uint8_t discard = */*(volatile uint8_t *)(spi->regbase + DW_SPI_DR);
     }
 }
 
