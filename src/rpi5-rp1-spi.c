@@ -129,7 +129,7 @@ uint8_t* initialize_strip(int leds_count)
     create_mosi_pin(rp1, 0x00); // MOSI is all we need anyways
 
     // set the speed - this is the divisor from 200MHz in the RPi5
-    *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 20; // 10 MHz
+    *(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR) = 40; // 5 MHz
     // printf("\nbaudr: %d MHz\n", 200/(*(volatile uint32_t *)(spi->regbase + DW_SPI_BAUDR)));
 
     // set mode - CPOL = 0, CPHA = 1 (Mode 1)
