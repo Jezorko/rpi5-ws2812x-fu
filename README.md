@@ -4,27 +4,7 @@ Fork of https://github.com/praktronics/rpi5-rp1-spi
 
 Using the SPI on the Raspberry Pi 5 through direct register control on the RP1 to drive a WS2812x LED strip.
 
-To build and run:
-```bash
-    /rpi5-ws2812x-fu $ mkdir build
-    /rpi5-ws2812x-fu $ cd build
-    /rpi5-ws2812x-fu/build $ cmake ..
-    /rpi5-ws2812x-fu/build $ cmake --build .
-```
-run with sudo or as root
-```bash
-    /rpi5-ws2812x-fu/build/bin $ sudo ./rpi5-rp1-spi
-```
-
-To compile a JNI `.so` library:
-
-```bash
-g++ -c -fPIC -I/usr/lib/jvm/default-java/include -I/usr/lib/jvm/default-java/include/linux rpi5-ws2812x-fu-jni.c -o jezor_jni_RPi5RP1SPI.o
-```
-
-```bash
-g++ -shared -fPIC -o librpi5ws2812xfu.so jezor_jni_RPi5RP1SPI.o -lc
-```
+To compile a JNI `.so` library use the `build.bash` script.
 
 This will match the following Java class:
 
