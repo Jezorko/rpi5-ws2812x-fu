@@ -177,19 +177,19 @@ int main(void)
     for (uint8_t red = 0x00; red < 0xff; ++red) {
         set_all_leds_to(red, 0x00, 0x00);
         render_strip();
-        usleep(10000);
+        usleep(100000);
     }
 
     for (uint8_t green = 0x00; green < 0xff; ++green) {
         set_all_leds_to(0x00, green, 0x00);
         render_strip();
-        usleep(10000);
+        usleep(100000);
     }
 
     for (uint8_t blue = 0x00; blue < 0xff; ++blue) {
         set_all_leds_to(0x00, 0x00, blue);
         render_strip();
-        usleep(10000);
+        usleep(100000);
     }
 
     sleep(2);
