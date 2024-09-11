@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <unistd.h>
+
 
 #include "rp1-regs.h"
 #include "rp1-spi.h"
@@ -177,6 +179,16 @@ int main(void)
     }
 
     render_strip();
+
+    sleep(2);
+
+    for (int led_id = 0; led_id < leds_count; ++led_id) {
+        int led_data_id = led_id * 3;
+        data[led_data_id + 0] = 0x00; // G
+        data[led_data_id + 1] = 0x00; // R
+        data[led_data_id + 2] = 0x00; // B
+    }
+
     close_strip();
 
     return 0;
