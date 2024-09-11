@@ -159,39 +159,42 @@ void render_strip() {
     rp1_spi_write_array_blocking(spi, data, data_length);
 }
 
-int main(void)
-{
-    int leds_count = 120;
-    uint8_t* data = initialize_strip(leds_count);
+int leds_count = 12;
 
-    // LED data
+void set_all_leds_to(uint8_t red, uint8_t green, uint8_t blue) {
     for (int led_id = 0; led_id < leds_count; ++led_id) {
         int led_data_id = led_id * 3;
-        if (led_id % 2 == 0) {
-            data[led_data_id + 1] = 0x00; // R
-            data[led_data_id + 0] = 0x00; // G
-            data[led_data_id + 2] = 0xff; // B
-        } else {
-            data[led_data_id + 1] = 0xff; // R
-            data[led_data_id + 0] = 0x00; // G
-            data[led_data_id + 2] = 0x00; // B
-        }
+        data[led_data_id + 1] = red;  // R
+        data[led_data_id + 0] = green; // G
+        data[led_data_id + 2] = blue; // B
+    }
+}
+
+int main(void)
+{
+    uint8_t* data = initialize_strip(leds_count);
+
+    for (uint8_t red = 0x00; red < 0xff; ++red) {
+        set_all_leds_to(red, 0x00, 0x00);
+        render_strip();
     }
 
-    render_strip();
+    for (uint8_t green = 0x00; green < 0xff; ++green) {
+        set_all_leds_to(0x00, green, 0x00);
+        render_strip();
+    }
+
+    for (uint8_t blue = 0x00; blue < 0xff; ++blue) {
+        set_all_leds_to(0x00, 0x00, blue);
+        render_strip();
+    }
 
     sleep(2);
 
-    for (int led_id = 0; led_id < leds_count; ++led_id) {
-        int led_data_id = led_id * 3;
-        data[led_data_id + 0] = 0x00; // G
-        data[led_data_id + 1] = 0x00; // R
-        data[led_data_id + 2] = 0x00; // B
-    }
+    set_all_leds_to(0x00, 0x00, 0x00);
 
     render_strip();
 
     close_strip();
-
     return 0;
 }
