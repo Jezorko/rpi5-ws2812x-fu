@@ -189,6 +189,8 @@ int main(void)
         data[led_data_id + 2] = 0x00; // B
     }
 
+    render_strip();
+
     close_strip();
 
     return 0;
