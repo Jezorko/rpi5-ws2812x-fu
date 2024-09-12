@@ -181,7 +181,7 @@ int main(void)
 
     for (uint8_t red = 0; red < 255; ++red) {
         printf("testing red %d", red);
-        usleep(1000);
+        sleep(1);
         set_all_leds_to(red, 0x00, 0x00);
         render_strip();
     }
