@@ -187,6 +187,8 @@ int main(void)
         }
     }
 
+    render_strip();
+
     sleep(2);
 
     set_all_leds_to(0x00, 0x00, 0x00);
