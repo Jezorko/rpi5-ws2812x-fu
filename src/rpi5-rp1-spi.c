@@ -98,7 +98,8 @@ void close_strip()
 uint8_t* initialize_strip(int leds_count)
 {
     data_length = leds_count * 3;
-    data = (uint8_t*) malloc(leds_count * 3);
+    // data = (uint8_t*) malloc(leds_count * 3);
+    data = calloc(leds_count * 3 + 1250 /* latch time */, sizeof(uint8_t*));
     /////////////////////////////////////////////////////////
     // RP1
 
@@ -161,12 +162,16 @@ void render_strip() {
 
 int leds_count = 12;
 
+void set_led(int led_id, uint8_t red, uint8_t green, uint8_t blue) {
+    int led_data_id = led_id * 3;
+    data[led_data_id + 1] = red;
+    data[led_data_id + 0] = green;
+    data[led_data_id + 2] = blue;
+}
+
 void set_all_leds_to(uint8_t red, uint8_t green, uint8_t blue) {
     for (int led_id = 0; led_id < leds_count; ++led_id) {
-        int led_data_id = led_id * 3;
-        data[led_data_id + 1] = red;  // R
-        data[led_data_id + 0] = green; // G
-        data[led_data_id + 2] = blue; // B
+        set_led(led_id, red, green, blue);
     }
 }
 
@@ -174,22 +179,12 @@ int main(void)
 {
     uint8_t* data = initialize_strip(leds_count);
 
-    for (uint8_t red = 0x00; red < 0xff; ++red) {
-        set_all_leds_to(red, 0x00, 0x00);
-        render_strip();
-        usleep(100000);
-    }
-
-    for (uint8_t green = 0x00; green < 0xff; ++green) {
-        set_all_leds_to(0x00, green, 0x00);
-        render_strip();
-        usleep(100000);
-    }
-
-    for (uint8_t blue = 0x00; blue < 0xff; ++blue) {
-        set_all_leds_to(0x00, 0x00, blue);
-        render_strip();
-        usleep(100000);
+    for (int led_id = 0; led_id < leds_count; ++led_id) {
+        if (led_id % 2 == 0) {
+            set_led(led_id, 0xff, 0x00, 0x00);
+        } else {
+            set_led(led_id, 0x00, 0x00, 0xff);
+        }
     }
 
     sleep(2);
