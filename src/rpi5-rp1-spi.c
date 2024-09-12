@@ -180,7 +180,7 @@ int main(void)
     uint8_t* data = initialize_strip(leds_count);
 
     for (uint8_t red = 0; red < 255; ++red) {
-        printf("testing red %d", red);
+        printf("testing red %d\n", red);
         sleep(1);
         set_all_leds_to(red, 0x00, 0x00);
         render_strip();
