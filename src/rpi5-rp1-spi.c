@@ -98,8 +98,8 @@ void close_strip()
 uint8_t* initialize_strip(int leds_count)
 {
     data_length = leds_count * 3;
-    // data = (uint8_t*) malloc(leds_count * 3);
-    data = calloc(leds_count * 3 + 1250 /* latch time */, sizeof(uint8_t*));
+    data = (uint8_t*) malloc(leds_count * 3);
+    // data = calloc(leds_count * 3 + 1250 /* latch time */, sizeof(uint8_t*));
     /////////////////////////////////////////////////////////
     // RP1
 
